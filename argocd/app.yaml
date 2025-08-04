@@ -3,18 +3,36 @@ kind: Application
 metadata:
   name: sre-app
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    environment: base
+    team: sre
 spec:
   project: sre-project
+
   source:
-    repoURL: https://github.com/rsergio07/sre-abc-training
+    repoURL: https://github.com/rsergio07/sre-gitops-deployments
     targetRevision: main
-    path: exercises/exercise10
+    path: k8s/base
+
   destination:
     server: https://kubernetes.default.svc
     namespace: application
+
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  revisionHistoryLimit: 10

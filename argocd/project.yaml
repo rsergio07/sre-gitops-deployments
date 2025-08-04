@@ -3,16 +3,50 @@ kind: AppProject
 metadata:
   name: sre-project
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
-  description: SRE ABC Training Project
+  description: SRE GitOps Project for multi-environment deployments
+
   sourceRepos:
-    - https://github.com/rsergio07/sre-abc-training
+    - https://github.com/rsergio07/sre-gitops-deployments
+
   destinations:
     - namespace: application
       server: https://kubernetes.default.svc
+    - namespace: dev
+      server: https://kubernetes.default.svc
+    - namespace: staging
+      server: https://kubernetes.default.svc
+    - namespace: production
+      server: https://kubernetes.default.svc
+
+  roles:
+    - name: dev-team
+      description: Development team limited access
+      policies:
+        - p, proj:sre-project:dev-team, applications, get, sre-project/*, allow
+        - p, proj:sre-project:dev-team, applications, sync, sre-project/*dev*, allow
+      groups:
+        - sre-developers
+
+    - name: sre-team
+      description: Full SRE team access
+      policies:
+        - p, proj:sre-project:sre-team, applications, *, sre-project/*, allow
+        - p, proj:sre-project:sre-team, repositories, *, *, allow
+      groups:
+        - sre-admins
+
   clusterResourceWhitelist:
-    - group: '*'
-      kind: '*'
+    - group: ""
+      kind: Namespace
   namespaceResourceWhitelist:
-    - group: '*'
-      kind: '*'
+    - group: apps
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: Secret
