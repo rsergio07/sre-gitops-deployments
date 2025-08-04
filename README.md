@@ -940,6 +940,14 @@ argocd app diff sre-app-dev
 
 In the UI, open `sre-app-dev`, observe **OutOfSync** and view the diff highlighting replica mismatch.
 
+### Visual Confirmation
+
+Expected UI when `sre-app-dev` is OutOfSync due to manual drift:
+
+![ArgoCD Dev Application OutOfSync](assets/phase3-drift-outofsync.png)
+
+*Caption:* `sre-app-dev` shows **OutOfSync** status, and the Diff view highlights the mismatch in `replicas` between the Git-declared value and the live cluster state. This confirms ArgoCD’s drift detection before reconciliation.
+
 **B. Git-driven desired-state change (self-heal still enabled):**
 
 > **Reminder:** Ensure ArgoCD port-forward is active and you're logged in.
@@ -971,54 +979,11 @@ kubectl get deployment sre-demo -n dev
 * Sync (manual or self-heal) restores declared state.
 * Git change (replica bump) results in a new applied revision with expected scaling.
 
-### Step 4 – Check ArgoCD System Health
-
-```bash
-kubectl get pods -n argocd
-kubectl exec -n argocd deployment/argocd-server -- argocd version
-kubectl logs -n argocd deployment/argocd-repo-server --tail=20
-```
-
-#### Resource Usage (if metrics server present)
-
-```bash
-kubectl top pods -n argocd
-kubectl get pv,pvc -n argocd
-```
-
-### Step 5 – Access Built-in ArgoCD Metrics
-
-> Open a new terminal for these so existing port-forwards / sessions are unaffected.
-
-```bash
-kubectl port-forward svc/argocd-server-metrics -n argocd 8082:8082 &
-
-curl -s localhost:8082/metrics | grep argocd | head -20
-
-echo "Application Health:"
-curl -s localhost:8082/metrics | grep argocd_app_health_status
-
-echo "Sync Counts:"
-curl -s localhost:8082/metrics | grep argocd_app_sync_total
-
-echo "Git Request Stats:"
-curl -s localhost:8082/metrics | grep argocd_git_request
-```
-
 ---
 
 ## **Expected Outcome**
 
-By completing this exercise, you have:
-
-✅ Installed and configured ArgoCD in a local Kubernetes cluster
-✅ Bootstrapped a declarative application from scratch
-✅ Created ArgoCD Project and Applications
-✅ Implemented multi-environment overlays and promotion
-✅ Detected and reconciled configuration drift
-✅ Applied Git-driven changes with automated reconciliation
-✅ Gained observability into sync/health/events and controller behavior
-✅ Practiced rollback/self-heal via GitOps principles
+By the end of this exercise, you will have installed and configured ArgoCD in your local Kubernetes cluster, bootstrapped a fully declarative application from scratch, and defined ArgoCD Projects and Applications. You’ll also implement and promote multi-environment overlays, detect and reconcile configuration drift, and apply Git-driven changes with automated reconciliation, gaining full visibility into sync status, health, and controller events.
 
 ---
 
