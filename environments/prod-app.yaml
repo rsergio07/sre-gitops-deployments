@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sre-app-prod
+  namespace: argocd
+  labels:
+    environment: production
+    team: sre
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: sre-project
+  source:
+    repoURL: https://github.com/rsergio07/sre-gitops-deployments
+    targetRevision: main
+    path: k8s/overlays/production
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 10m
+  revisionHistoryLimit: 20
