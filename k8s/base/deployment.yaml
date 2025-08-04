@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sre-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sre-demo
+  template:
+    metadata:
+      labels:
+        app: sre-demo
+    spec:
+      containers:
+        - name: sre-demo
+          image: docker.io/library/nginx:stable
+          ports:
+            - containerPort: 80
